@@ -16,8 +16,8 @@ def get_bar_coordinates(bar):
 
 
 def get_default_latlng():
-    r = requests.get('https://api.userinfo.io/userinfos')
-    user_data = r.json()
+    request = requests.get('https://api.userinfo.io/userinfos')
+    user_data = request.json()
     position = user_data['position']
     return [position['latitude'], position['longitude']]
 
@@ -31,28 +31,26 @@ def get_distance(coordinates1, coordinates2):
 
 
 def load_data(filepath):
-    r = requests.get(filepath)
-    return r.json()['features']
+    request = requests.get(filepath)
+    return request.json()['features']
 
 
 def coordinates_to_str(coordinates):
     return ','.join(map(str, coordinates))
 
 
-def get_biggest_bar(data):
-    data.sort(key=get_bar_seatscount, reverse=True)
-    return data[0]
+def get_biggest_bar(bars_data):
+    return max(bars_data, key=get_bar_seatscount)
 
 
-def get_smallest_bar(data):
-    data.sort(key=get_bar_seatscount)
-    return data[0]
+def get_smallest_bar(bars_data):
+    return min(bars_data, key=get_bar_seatscount)
 
 
-def get_closest_bar(data, longitude, latitude):
-    data.sort(key=lambda x: get_distance(
+def get_closest_bar(bars_data, longitude, latitude):
+    bars_data.sort(key=lambda x: get_distance(
         get_bar_coordinates(x), [latitude, longitude]))
-    return data[0]
+    return bars_data[0]
 
 
 def main():
