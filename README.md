@@ -11,15 +11,21 @@
 
 Скрипт требует для своей работы установленного интерпретатора Python версии 3.5
 
+Для загрузки данных можно использовать url `https://devman.org/fshare/1503831681/4/`
+
 Запуск на Linux:
+
+`python3 bars.py DB_FILE.json`
+
+По-умолчанию используется файл `bars.json` из директории проекта.
 
 ```bash
 $ python3 bars.py
-Which url should we use to load data? (or just enter to use https://devman.org/fshare/1503831681/4/) -
-Please enter your coordinates in format `lat, lng` (like `24.4667,54.3667`) or just press enter -
-Biggest bar is `Спорт бар «Красная машина»` with 450 seats
-Smallest bar is `БАР. СОКИ` with 0 seats
-Closest bar is `Бар Виват` with  coordinates 37.511274999942046,55.448750279822924
+Your coordinates in format `lat, lng` or just press enter
+We detected your  coordinates as `25.2582,55.3047` -
+Biggest bar is ``Спорт бар «Красная машина»` (seat(s) - 450, coordinates - 37.638228501070095,55.70111462948684)`
+Smallest bar is ``БАР. СОКИ` (seat(s) - 0, coordinates - 37.35805920566864,55.84614475898795)`
+Closest bar is ``Бар Виват` (seat(s) - 35, coordinates - 37.511274999942046,55.448750279822924)`
 ```
 
 Запуск на Windows происходит аналогично.

@@ -1,6 +1,6 @@
 import requests
-
-default_bars_url = 'https://devman.org/fshare/1503831681/4/'
+import json
+import sys
 
 
 def get_bar_name(bar):
@@ -16,10 +16,14 @@ def get_bar_coordinates(bar):
 
 
 def get_default_latlng():
-    request = requests.get('https://api.userinfo.io/userinfos')
-    user_data = request.json()
-    position = user_data['position']
-    return [position['latitude'], position['longitude']]
+    try:
+        response = requests.get('https://api.userinfo.io/userinfos')
+        user_data = response.json()
+        position = user_data['position']
+        return [position['latitude'], position['longitude']]
+    except requests.exceptions.RequestException as e:
+        # Moscow
+        return [55.7558, 37.6173]
 
 
 def get_distance(coordinates1, coordinates2):
@@ -31,8 +35,8 @@ def get_distance(coordinates1, coordinates2):
 
 
 def load_data(filepath):
-    request = requests.get(filepath)
-    return request.json()['features']
+    with open(filepath) as filepointer:
+        return json.load(filepointer)['features']
 
 
 def coordinates_to_str(coordinates):
@@ -48,14 +52,26 @@ def get_smallest_bar(bars_data):
 
 
 def get_closest_bar(bars_data, longitude, latitude):
-    bars_data.sort(key=lambda x: get_distance(
-        get_bar_coordinates(x), [latitude, longitude]))
-    return bars_data[0]
+    return min(
+        bars_data,
+        key=lambda x: get_distance(
+            get_bar_coordinates(x), [latitude, longitude])
+    )
+
+
+def print_bar(bar):
+    return "`{}` (seat(s) - {}, coordinates - {})".format(
+        get_bar_name(bar),
+        get_bar_seatscount(bar),
+        coordinates_to_str(get_bar_coordinates(bar))
+    )
 
 
 def main():
-    file_url = input('Url to load data? (or just enter to use {}) - '.format(
-        default_bars_url)) or default_bars_url
+    if (len(sys.argv) > 2):
+        filename = sys.argv[1]
+    else:
+        filename = 'bars.json'
 
     default_latlng_str = coordinates_to_str(get_default_latlng())
     latlng_str = input('''
@@ -63,25 +79,17 @@ Your coordinates in format `lat, lng` or just press enter
 We detected your  coordinates as `{}` - '''.strip().format(
         default_latlng_str)) or default_latlng_str
 
-    [s_lat, s_lng] = latlng_str.split(',')
-    lat = float(s_lat.strip())
-    lng = float(s_lng.strip())
+    [lat, lng] = map(lambda x: float(x.strip()), latlng_str.split(','))
 
-    bars_data = load_data(file_url)
+    bars_data = load_data(filename)
 
     biggest_bar = get_biggest_bar(bars_data)
     smallest_bar = get_smallest_bar(bars_data)
     closest_bar = get_closest_bar(bars_data, lat, lng)
 
-    print('Biggest bar is `{}` with {} seats'.format(
-        get_bar_name(biggest_bar), get_bar_seatscount(biggest_bar)))
-    print('Smallest bar is `{}` with {} seats'.format(
-        get_bar_name(smallest_bar), get_bar_seatscount(smallest_bar)))
-
-    closest_bar_coordinates = coordinates_to_str(
-        get_bar_coordinates(closest_bar))
-    print('Closest bar is `{}` with  coordinates {}'.format(
-        get_bar_name(closest_bar), closest_bar_coordinates))
+    print('Biggest bar is `{}`'.format(print_bar(biggest_bar)))
+    print('Smallest bar is `{}`'.format(print_bar(smallest_bar)))
+    print('Closest bar is `{}`'.format(print_bar(closest_bar)))
 
 
 if __name__ == '__main__':
