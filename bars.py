@@ -78,29 +78,33 @@ def request_user_coordinates():
     We detected your  coordinates as `{}` - '''.strip().format(
         default_latlng_str)) or default_latlng_str
 
-    try:
-        return map(lambda x: float(x.strip()), latlng_str.split(','))
-    except ValueError:
-        sys.exit("Please enter coordinates in correct format")
+    return map(lambda x: float(x.strip()), latlng_str.split(','))
 
 
 def load_bars_data(filename):
     try:
         return load_data(filename)
     except FileNotFoundError:
-        sys.exit("Please pass correct file name")
+        return None
     except json.decoder.JSONDecodeError:
-        sys.exit("Provided file does not contains correct json data")
+        return None
 
 
-def main():
+if __name__ == '__main__':
     if (len(sys.argv) < 2):
-        return sys.exit("Please pass filename as param")
+        sys.exit("Please pass filename as param")
 
     filename = sys.argv[1]
 
     bars_data = load_bars_data(filename)
-    [lat, lng] = request_user_coordinates()
+
+    if bars_data is None:
+        sys.exit("Please pass correct json file name")
+
+    try:
+        [lat, lng] = request_user_coordinates()
+    except ValueError:
+        sys.exit("Please enter coordinates in correct format")
 
     biggest_bar = get_biggest_bar(bars_data)
     smallest_bar = get_smallest_bar(bars_data)
@@ -109,7 +113,3 @@ def main():
     print('Biggest bar is `{}`'.format(print_bar(biggest_bar)))
     print('Smallest bar is `{}`'.format(print_bar(smallest_bar)))
     print('Closest bar is `{}`'.format(print_bar(closest_bar)))
-
-
-if __name__ == '__main__':
-    main()
