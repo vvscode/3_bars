@@ -71,29 +71,36 @@ def print_bar(bar):
     )
 
 
-def main():
-    if (len(sys.argv) < 2):
-        sys.exit("Please pass filename as param")
-
-    filename = sys.argv[1]
+def request_user_coordinates:
+    default_latlng_str = coordinates_to_str(get_default_latlng())
+    latlng_str = input('''
+    Your coordinates in format `lat, lng` or just press enter
+    We detected your  coordinates as `{}` - '''.strip().format(
+        default_latlng_str)) or default_latlng_str
 
     try:
-        bars_data = load_data(filename)
+        return map(lambda x: float(x.strip()), latlng_str.split(','))
+    except ValueError:
+        sys.exit("Please enter coordinates in correct format")
+
+
+def load_bars_data(filename):
+    try:
+        return load_data(filename)
     except FileNotFoundError:
         sys.exit("Please pass correct file name")
     except json.decoder.JSONDecodeError:
         sys.exit("Provided file does not contains correct json data")
 
-    default_latlng_str = coordinates_to_str(get_default_latlng())
-    latlng_str = input('''
-Your coordinates in format `lat, lng` or just press enter
-We detected your  coordinates as `{}` - '''.strip().format(
-        default_latlng_str)) or default_latlng_str
 
-    try:
-        [lat, lng] = map(lambda x: float(x.strip()), latlng_str.split(','))
-    except ValueError:
-        sys.exit("Please enter coordinates in correct format")
+def main():
+    if (len(sys.argv) < 2):
+        return sys.exit("Please pass filename as param")
+
+    filename = sys.argv[1]
+
+    bars_data = load_bars_data(filename)
+    [lat, lng] = request_user_coordinates()
 
     biggest_bar = get_biggest_bar(bars_data)
     smallest_bar = get_smallest_bar(bars_data)
