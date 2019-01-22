@@ -71,7 +71,7 @@ def print_bar(bar):
     )
 
 
-def request_user_coordinates:
+def request_user_coordinates():
     default_latlng_str = coordinates_to_str(get_default_latlng())
     latlng_str = input('''
     Your coordinates in format `lat, lng` or just press enter
