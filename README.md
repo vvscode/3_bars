@@ -13,11 +13,13 @@
 
 Для загрузки данных можно использовать url `https://devman.org/fshare/1503831681/4/`
 
+Скачать и сохранить файл с данными можно командой
+
+`wget 'https://devman.org/fshare/1503831681/4/' -O bars.json`
+
 Запуск на Linux:
 
 `python3 bars.py DB_FILE.json`
-
-По-умолчанию используется файл `bars.json` из директории проекта.
 
 ```bash
 $ python3 bars.py

@@ -16,14 +16,18 @@ def get_bar_coordinates(bar):
 
 
 def get_default_latlng():
+    moscow_coordinates = [55.7558, 37.6173]
     try:
         response = requests.get('https://api.userinfo.io/userinfos')
         user_data = response.json()
         position = user_data['position']
+        if position['latitude'] is None or position['longitude'] is None:
+            raise ValueError("Error on detecting positon")
         return [position['latitude'], position['longitude']]
     except requests.exceptions.RequestException as e:
-        # Moscow
-        return [55.7558, 37.6173]
+        return moscow_coordinates
+    except ValueError:
+        return moscow_coordinates
 
 
 def get_distance(coordinates1, coordinates2):
@@ -31,7 +35,7 @@ def get_distance(coordinates1, coordinates2):
     [lat2, lng2] = coordinates2
     lat_distance = abs(lat1 - lat2)
     lng_distance = abs(lng1 - lng2)
-    return (lat_distance**2 + lng_distance**2)**0.5
+    return (lat_distance ** 2 + lng_distance ** 2) ** 0.5
 
 
 def load_data(filepath):
@@ -68,10 +72,17 @@ def print_bar(bar):
 
 
 def main():
-    if (len(sys.argv) > 2):
-        filename = sys.argv[1]
-    else:
-        filename = 'bars.json'
+    if (len(sys.argv) < 2):
+        sys.exit("Please pass filename as param")
+
+    filename = sys.argv[1]
+
+    try:
+        bars_data = load_data(filename)
+    except FileNotFoundError:
+        sys.exit("Please pass correct file name")
+    except json.decoder.JSONDecodeError:
+        sys.exit("Provided file does not contains correct json data")
 
     default_latlng_str = coordinates_to_str(get_default_latlng())
     latlng_str = input('''
@@ -79,9 +90,10 @@ Your coordinates in format `lat, lng` or just press enter
 We detected your  coordinates as `{}` - '''.strip().format(
         default_latlng_str)) or default_latlng_str
 
-    [lat, lng] = map(lambda x: float(x.strip()), latlng_str.split(','))
-
-    bars_data = load_data(filename)
+    try:
+        [lat, lng] = map(lambda x: float(x.strip()), latlng_str.split(','))
+    except ValueError:
+        sys.exit("Please enter coordinates in correct format")
 
     biggest_bar = get_biggest_bar(bars_data)
     smallest_bar = get_smallest_bar(bars_data)
